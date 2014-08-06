@@ -10,81 +10,86 @@
                 font-size: 12px;
                 fill: black;
             }
+ 
+            svg {
+               margin-left: 15%;
+            }
         </style>
     </head>
     <body>
         <script type="text/javascript">
-             var dataset = [
-            { "label": "稅課收入", "value": 796288775},
-            { "label": "罰款及賠償收入", "value": 739228241},
-            { "label": "規費收入", "value": 10064533},
-            { "label": "財產收入", "value": 18161868},
-            { "label": "捐獻及贈與收入", "value": 6073509},
-            { "label": "公債及賒借收入", "value":  6020},
-            { "label": "其他收入", "value": 6912757},
-            { "label": "以前年度總預算收入", "value": 46304651},
-            { "label": "營業盈餘及事業收入", "value":  15841846},
-            { "label":"特別預算收入", "value": 13538583},
-            { "label": "預算外收入", "value": 610694112}];
-            var distance = [0, 0, 20, 10, 0, 6, 7, 10, 10, 20 ,11];
-
+            var dataset = [
+            { "label": "一般政務及國防支出", "value": 958019845},
+            { "label": "教育科學文化支出", "value": 25664013},
+            { "label": "經濟發展支出", "value": 168755436},
+            { "label": "特別預算支出", "value": 11239220},
+            { "label": "社會安全支出", "value": 118038097},
+            { "label": "以前年度總預算支出", "value": 12363789},
+            { "label": "退休撫卹支出", "value": 221910299},
+            { "label": "調整待遇支出", "value": 41484634},
+            { "label": "債務支出", "value":  120486698},
+            { "label": "其他支出", "value":  1603321},
+            { "label": "補助支出", "value": 60077346},
+          { "label": "預算外支出 ", "value":  66146100}];
+ 
+ 
             var width = 600,   
                 height = 520,
                 radius = Math.min(width, height) / 2;
-            color = d3.scale.category20();
-
+                color = d3.scale.category20();
+ 
             var outerRadius = radius - 80;
             var innerRadius = radius - 200;
-
+ 
             var pie = d3.layout.pie()
                 .value(function(d) { return d.value; })
                 .sort( function(d) { return null; } );
-
+ 
                 var arc = d3.svg.arc()
-            .innerRadius(innerRadius)
-                .outerRadius(outerRadius);
-
+                  .innerRadius(innerRadius)
+                  .outerRadius(outerRadius);
+ 
                 var svg = d3.select("body")
-                .append("svg")
-            .data([dataset])  
-                .attr("width", width)
-                .attr("height", height)
-                .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
-
+                  .append("svg")
+                  .data([dataset])  
+                  .attr("width", width)
+                  .attr("height", height)
+                  .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+ 
                 var arcs = svg.selectAll("g.arc")
-                .data(pie)
-            .enter()
-                .append("g")
-                .attr("class", "arc")
-                .attr("transform", "translate(" + width/2 + "," + height/2 + ")");
-
-
+                  .data(pie)
+                  .enter()
+                  .append("g")
+                  .attr("class", "arc")
+                  .attr("transform", "translate(" + width/2 + "," + height/2 + ")");
+ 
+ 
                 arcs.append("path")
-                .attr("fill", function(d, i) {
+                  .attr("fill", function(d, i) {
                         return color(i);
-                        })
-            .attr("d", arc);
-
+                  })
+                  .attr("d", arc);
+ 
             arcs.append("text")
-            .attr("text-anchor", "middle")
-            .attr("x", function(d) {
+              .attr("text-anchor", "middle")
+              .attr("x", function(d) {
                     var a = d.startAngle + (d.endAngle - d.startAngle)/2 - Math.PI/2;
                     d.cx = Math.cos(a) * (radius - 75);
                     return d.x = Math.cos(a) * (radius - 20);
                     })
-            .attr("y", function(d, i) {
+              .attr("y", function(d) {
                     var a = d.startAngle + (d.endAngle - d.startAngle)/2 - Math.PI/2;
                     d.cy = Math.sin(a) * (radius - 75);
-                    return d.y = Math.sin(a) * (radius - 20) - distance[i];
+                    return d.y = Math.sin(a) * (radius - 20);
                     })
-            .text(function(d, i) { return dataset[i].label; })
-            .each(function(d) {
+              .text(function(d, i) { return dataset[i].label; })
+              .each(function(d) {
                 var bbox = this.getBBox();
                 d.sx = d.x - bbox.width/2 - 2;
                 d.ox = d.x + bbox.width/2 + 2;
                 d.sy = d.oy = d.y + 5;
-             });
-
+               });
+ 
             arcs.filter(function(d) { return d.endAngle - d.startAngle > .2; }).append("svg:text")
                 .attr("dy", ".35em")
                 .attr("text-anchor", "middle")
