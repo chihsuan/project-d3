@@ -1,6 +1,6 @@
+<!DOCTYPE html>
 <html>
-  <!DOCTYPE html>
-  <head>
+<head>
 <meta charset="utf-8">
 <style>
   @import url(http://fonts.googleapis.com/earlyaccess/notosanstc.css);
@@ -14,7 +14,7 @@ text {
 <script src="//d3js.org/d3.v3.min.js"></script>
 <script>
 
-var diameter = 870,
+var diameter = 900,
     format = d3.format(",d"),
     color = d3.scale.linear()
     .domain([0, 1, 2, 5,  54])
@@ -23,10 +23,10 @@ var diameter = 870,
 var bubble = d3.layout.pack()
     .sort(null)
     .size([diameter, diameter])
-    .padding(10);
+    .padding(25);
 
 var svg = d3.select("body").append("svg")
-    .attr("width", diameter)
+    .attr("width", diameter+50)
     .attr("height", diameter)
     .attr("class", "bubble");
 
