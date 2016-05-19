@@ -1,0 +1,183 @@
+<html>
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  margin: auto;
+  position: relative;
+  width: 960px;
+}
+
+.arc text {
+  font-weight: bold;
+  text-anchor: middle;
+  font-size: 16px;
+}
+
+.arc path {
+  stroke: #fff;
+}
+
+</style>
+<body>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
+<script src="//d3js.org/d3.v3.min.js"></script>
+<script>
+
+var dataset = {}
+
+var width = 960,
+    height = 600,
+    radius = Math.min(width, height) / 2;
+
+var color = {};
+
+color._0 = d3.scale.ordinal()
+    .range(["#F2F3E5", "#78B0B4"]);
+
+color._1 = d3.scale.ordinal()
+    .range(["#F2F3E5", "#51505B", "#78B0B4"]);
+
+var arc = d3.svg.arc()
+    .outerRadius(radius - 10)
+    .innerRadius(0);
+
+var labelArc = d3.svg.arc()
+    .outerRadius(radius - 80)
+    .innerRadius(radius - 80);
+
+var pie = d3.layout.pie()
+    .sort(null)
+    .value(function(d) { return d.value; });
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+  .append("g")
+    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+var arc_text;
+var path, g;
+
+d3.csv("./data/data0.csv", function(error, data) {
+  if (error) throw error;
+
+  dataset._0 = data;
+
+
+  g = svg.selectAll(".arc")
+      .data(pie(data))
+    .enter().append("g")
+      .attr("class", "arc");
+
+  path = g.selectAll('path')
+  g.append("path")
+      .attr("d", arc)
+      .style("fill", function(d) {
+      return color._0(d.data.gender);
+  });
+
+  arc_text = g.append("text")
+  .attr("transform", function(d) {
+    return "translate(" + labelArc.centroid(d) + ")"; })
+      .attr("dy", ".35em")
+      .text(function(d) { return d.data.key; });
+});
+
+d3.csv('./data/data1.csv', function(data) {
+  dataset._1 = data;
+  change('_1');
+})
+
+function arcTween(a){
+  var i = d3.interpolate(this._current, a);
+  this._current = i(0);
+  return function(t) {
+      return arc(i(t));
+  };
+}
+
+function change(k){
+  var data0 = path.data(),
+      data1 = pie(dataset[k]);
+
+  path = path.data(data1);
+
+  path.enter().append("path")
+        .each(function(d, i) { this._current = findNeighborArc(i, data0, data1, key) || d; })
+        .attr("fill", function(d) { return color[k](d.data.value); })
+
+    path.exit()
+        .datum(function(d, i) { return findNeighborArc(i, data1, data0, key) || d; })
+      .transition()
+        .duration(750)
+        .attrTween("d", arcTween)
+        .remove();
+
+    path.transition()
+        .duration(750)
+        .attrTween("d", arcTween);
+
+  d3.selectAll('text').remove();
+
+  var p = path[path.length-1];
+  for (var i =0; i < p.length; i++) {
+    d3.selectAll('.arc').append('text')
+      .attr("transform", "translate(" + labelArc.centroid(p[i].__data__) + ")")
+      .attr("dy", ".35em")
+      .text(p[i].__data__.data.key + p[i].__data__.data.value);
+  }
+}
+
+function key(d) {
+  return d.data.value;
+}
+
+function findNeighborArc(i, data0, data1, key) {
+  var d;
+  return (d = findPreceding(i, data0, data1, key)) ? {startAngle: d.endAngle, endAngle: d.endAngle}
+      : (d = findFollowing(i, data0, data1, key)) ? {startAngle: d.startAngle, endAngle: d.startAngle}
+      : null;
+}
+
+// Find the element in data0 that joins the lowest following element in data1.
+function findFollowing(i, data0, data1, key) {
+  var n = data1.length, m = data0.length;
+  while (++i < n) {
+    var k = key(data1[i]);
+    for (var j = 0; j < m; ++j) {
+      if (key(data0[j]) === k) return data0[j];
+    }
+  }
+}
+
+
+// Find the element in data0 that joins the highest preceding element in data1.
+function findPreceding(i, data0, data1, key) {
+  var m = data0.length;
+  while (--i >= 0) {
+    var k = key(data1[i]);
+    for (var j = 0; j < m; ++j) {
+      if (key(data0[j]) === k) return data0[j];
+    }
+  }
+}
+
+
+var c = '_1';
+$('body').click(function() {
+  if( c == '_1') {
+    change('_0');
+    c = '_0';
+  }
+  else {
+    change('_1');
+    c = '_1';
+  }
+});
+
+</script>
+</body>
+</html>

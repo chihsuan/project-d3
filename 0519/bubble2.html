@@ -1,0 +1,80 @@
+<html>
+  <!DOCTYPE html>
+  <head>
+<meta charset="utf-8">
+<style>
+  @import url(http://fonts.googleapis.com/earlyaccess/notosanstc.css);
+text {
+  font-size: 16px;
+  font-family: 'Noto Sans TC';
+}
+</style>
+</head>
+<body>
+<script src="//d3js.org/d3.v3.min.js"></script>
+<script>
+
+var diameter = 870,
+    format = d3.format(",d"),
+    color = d3.scale.linear()
+    .domain([0, 1, 2, 5,  54])
+    .range(['#03A9F4', '#8BC34A', '#FFC107', 'rgb(255, 87, 34)', 'rgb(218, 31, 17)']);
+
+var bubble = d3.layout.pack()
+    .sort(null)
+    .size([diameter, diameter])
+    .padding(10);
+
+var svg = d3.select("body").append("svg")
+    .attr("width", diameter)
+    .attr("height", diameter)
+    .attr("class", "bubble");
+
+d3.csv('./data/data3.csv', function(data) {
+
+  var node = svg.selectAll(".node")
+      .data(bubble.nodes(classes(data))
+      .filter(function(d) { return !d.children; }))
+    .enter().append("g")
+      .attr("class", "node")
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+
+
+  node.append("circle")
+      .attr("r", function(d) { return (Math.log(d.value)+1) * 30; })
+      .style("fill", function(d) { return color(d.value); });
+
+  node.append("text")
+      .attr("dy", ".3em")
+      .style("text-anchor", "middle")
+      .text(function(d) { return d.key });
+});
+
+// Returns a flattened hierarchy containing all leaf nodes under the root.
+function classes(root) {
+
+  var classes = {
+    children: []
+  };
+
+  root.sort(function(a, b) {
+      return  b.value - a.value;
+  });
+
+
+  var obj = classes.children;
+  root.forEach(function(d) {
+    classes.children.push({
+      key: d.key,
+      value: d.value
+    });
+  });
+
+  return classes;
+}
+
+d3.select(self.frameElement).style("height", diameter + "px");
+
+</script>
+</body>
+</html>
